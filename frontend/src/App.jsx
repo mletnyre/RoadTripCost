@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import DefaultForm from './DefaultForm.jsx'
 
 function App() {
   const [message, setMessage] = useState('');
@@ -10,11 +11,15 @@ function App() {
       .catch(err => console.error(err));
   }, []);
 
+
   return (
+    <>
     <div>
       <h1>React + Express Connection</h1>
       <p>{message}</p>
     </div>
+    <DefaultForm />
+    </>
   );
 }
 
