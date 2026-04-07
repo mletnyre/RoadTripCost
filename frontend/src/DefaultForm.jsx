@@ -13,6 +13,31 @@ export default function DefaultForm() {
     CalculateRoute(start, end);
   }
 
+  async function CallOSMR(coordinates){
+    console.log("using data:" ,coordinates);
+
+    const startLat = coordinates.start.lat;
+    const startLon = coordinates.start.lon;
+    const endLat   = coordinates.end.lat;
+    const endLon   = coordinates.end.lon;
+
+    console.log("Starting (Lat,Lon) ("+startLat +","+startLon+")")
+    console.log("Ending   (Lat,Lon) ("+endLat +","+endLon+")")
+
+    const url = `http://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`;
+  
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const route = data.routes[0];
+    const miles = route.distance * 0.000621371;
+
+    console.log("Distance (m):", route.distance);
+    console.log("Distance (Mi):", miles);
+    console.log("Duration (s):", route.duration);
+    console.log("Coordinates:", route.geometry.coordinates);
+  }
+
   function CalculateRoute(start, end) {
     const data = { start, end }
     fetch(`http://localhost:5000/api/route`,{
@@ -23,8 +48,13 @@ export default function DefaultForm() {
       body: JSON.stringify(data)
     })
       .then(res => res.json())
-      .then(json => console.log("backend response:", json))
+      .then(json => {
+        console.log("backend response:", json)
+        return json;
+      })
+      .then(res => CallOSMR(res))
       .catch((err) => console.error(err));
+
   }
 
   return (
