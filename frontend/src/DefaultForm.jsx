@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 export default function DefaultForm() {
+
+  const [routeInfo, setRouteInfo] = useState(null);
 
   function enterData(event) {
     event.preventDefault(); // prevent page reload
@@ -30,12 +34,17 @@ export default function DefaultForm() {
     const data = await res.json();
 
     const route = data.routes[0];
-    const miles = route.distance * 0.000621371;
+
+    const miles = (route.distance * 0.000621371).toFixed(1);
+    const min = (route.duration / 60).toFixed(1);
 
     console.log("Distance (m):", route.distance);
     console.log("Distance (Mi):", miles);
     console.log("Duration (s):", route.duration);
+    console.log("Duration (min)", min)
     console.log("Coordinates:", route.geometry.coordinates);
+
+    setRouteInfo({miles, min})
   }
 
   function CalculateRoute(start, end) {
@@ -54,7 +63,7 @@ export default function DefaultForm() {
       })
       .then(res => CallOSMR(res))
       .catch((err) => console.error(err));
-
+ 
   }
 
   return (
@@ -74,6 +83,12 @@ export default function DefaultForm() {
 
         <button type="submit">Submit</button>
       </form>
+      {routeInfo && (
+        <div>
+          <p>Distance: {routeInfo.miles} miles</p>
+          <p>Duration: {routeInfo.min} minutes</p>
+        </div>
+      )}
       <footer className="footer">This uses OpenStreetMap for all the map stuff</footer>
     </div>
   );
