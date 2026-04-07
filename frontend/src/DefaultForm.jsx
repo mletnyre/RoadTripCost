@@ -44,6 +44,7 @@ export default function DefaultForm() {
 
         <button type="submit">Submit</button>
       </form>
+      <footer className="footer">This uses OpenStreetMap for all the map stuff</footer>
     </div>
   );
 }
