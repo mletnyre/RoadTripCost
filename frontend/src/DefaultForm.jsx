@@ -1,7 +1,4 @@
-import { useState } from "react";
-
 export default function DefaultForm() {
-  const [message, setMessage] = useState(""); // store API response
 
   function enterData(event) {
     event.preventDefault(); // prevent page reload
@@ -17,8 +14,11 @@ export default function DefaultForm() {
   }
 
   function CalculateRoute(start, end) {
-    fetch(`http://localhost:5000/api/${start}/${end}`)
-      .then((res) => res.json())
+    fetch(`http://localhost:5000/api/route?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,{
+      headers:{
+        'User-Agent': 'Road Trip Cost/1.0 (mletnyre@gmail.com)'
+      }
+    })
       .then((data) => setMessage(data.message))
       .catch((err) => console.error(err));
   }
@@ -40,8 +40,6 @@ export default function DefaultForm() {
 
         <button type="submit">Submit</button>
       </form>
-
-      {message && <p>API Response: {message}</p>}
     </div>
   );
 }

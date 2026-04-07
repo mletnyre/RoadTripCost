@@ -1,62 +1,58 @@
 const express = require('express');
-const cors = require('cors'); // import cors
+const cors = require('cors');
 const app = express();
 const PORT = 5000;
 
-app.use(cors()); // allow all origins (you can restrict later)
+app.use(cors());
 app.use(express.json());
 
-// test route
+// test routes
+app.listen(5000, () => console.log("Server running on port 5000"));
+
 app.get('/', (req, res) => {
   res.send('Backend is running!');
 });
 
-app.get("/api/:start/:end", async (req, res) => {
-  const { start, end } = req.params;
+// end test routes
 
-  try {
-    // 1. Geocode start
-    const startGeoRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(start)}&format=json`
-    );
-    const startData = await startGeoRes.json();
-    if (!startData || startData.length === 0) {
-      return res.status(400).json({ message: "Start address not found" });
-    }
-    const startCoords = `${startData[0].lat},${startData[0].lon}`;
+async function FindLatLong(url){
+  try{
+    console.log("FindingLatLong on URL: " + url);
+    const res = await fetch(url);
+    const data = await res.json();
 
-    // 2. Geocode end
-    const endGeoRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(end)}&format=json`
-    );
-    const endData = await endGeoRes.json();
-    if (!endData || endData.length === 0) {
-      return res.status(400).json({ message: "End address not found" });
-    }
-    const endCoords = `${endData[0].lat},${endData[0].lon}`;
+    console.log(data);
 
-    // 3. Call OSRM with coordinates
-    const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${startCoords};${endCoords}?overview=false`;
-    const osrmRes = await fetch(osrmUrl);
-    const osrmData = await osrmRes.json();
+    const lat=data[0].lat;
+    const lon=data[0].lon;
 
-    const routeInfo = {
-      distance: osrmData.routes[0].distance,
-      duration: osrmData.routes[0].duration,
-      message: `Distance: ${osrmData.routes[0].distance} meters, ETA: ${Math.round(
-        osrmData.routes[0].duration / 60
-      )} minutes`,
-    };
+    console.log("lat: ", lat, "long:", lon);
 
-    res.json(routeInfo);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error calculating route" });
+    return {lat,lon};
+  } catch(err){
+    console.error("Error converting address to coordinates " + err + "\nURL: "+ url);
+    return null;
   }
+}
+
+app.get("/api/route", async (req, res) => { 
+  console.log("Calculating Route...")
+  const {start, end} = req.query;
+
+  console.log("Starting Address: " + start);
+  console.log("Ending Address: " + end);
+
+
+  //sanatize the url.........
+  const cleanStart = start.replace(/"/g, '').trim();
+  const cleanEnd = end.replace(/"/g, '').trim();
+
+  const startURL = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanStart)}&format=json`;
+  const endURL = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanEnd)}&format=json`;
+
+  const startLatLong = await FindLatLong(startURL);
+  const endLatLong = await FindLatLong(endURL);
+
+  res.send();
 });
 
-app.listen(5000, () => console.log("Server running on port 5000"));
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
