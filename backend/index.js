@@ -18,41 +18,45 @@ app.get('/', (req, res) => {
 async function FindLatLong(url){
   try{
     console.log("FindingLatLong on URL: " + url);
-    const res = await fetch(url);
-    const data = await res.json();
+    const res = await fetch(url, {
+      headers:{
+        "User-Agent": "Road Trip Cost/1.0 (mletnyre@gmail.com)",
+        "Accept": "application/json"
+      }
+    });
 
+    const data = await res.json();
     console.log(data);
 
-    const lat=data[0].lat;
-    const lon=data[0].lon;
-
-    console.log("lat: ", lat, "long:", lon);
+    const {lat, lon} = data[0];
 
     return {lat,lon};
+
   } catch(err){
     console.error("Error converting address to coordinates " + err + "\nURL: "+ url);
     return null;
   }
 }
 
-app.get("/api/route", async (req, res) => { 
+app.post("/api/route", async (req, res) => { 
   console.log("Calculating Route...")
-  const {start, end} = req.query;
+  const {start, end} = req.body;
 
   console.log("Starting Address: " + start);
   console.log("Ending Address: " + end);
 
-
-  //sanatize the url.........
-  const cleanStart = start.replace(/"/g, '').trim();
-  const cleanEnd = end.replace(/"/g, '').trim();
-
-  const startURL = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanStart)}&format=json`;
-  const endURL = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanEnd)}&format=json`;
+  const startURL = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(start)}&format=json`;
+  const endURL = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(end)}&format=json`;
 
   const startLatLong = await FindLatLong(startURL);
   const endLatLong = await FindLatLong(endURL);
 
-  res.send();
+  console.log("Starting (Lat,Lon) ("+startLatLong.lat +","+startLatLong.lon+")")
+  console.log("Ending   (Lat,Lon) ("+endLatLong.lat +","+endLatLong.lon+")")
+
+  res.json({
+    start: startLatLong,
+    end: endLatLong
+  });
 });
 

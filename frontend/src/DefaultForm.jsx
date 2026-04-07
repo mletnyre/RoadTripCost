@@ -14,12 +14,16 @@ export default function DefaultForm() {
   }
 
   function CalculateRoute(start, end) {
-    fetch(`http://localhost:5000/api/route?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,{
+    const data = { start, end }
+    fetch(`http://localhost:5000/api/route`,{
+      method: "POST",
       headers:{
-        'User-Agent': 'Road Trip Cost/1.0 (mletnyre@gmail.com)'
-      }
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
     })
-      .then((data) => setMessage(data.message))
+      .then(res => res.json())
+      .then(json => console.log("backend response:", json))
       .catch((err) => console.error(err));
   }
 
