@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 export default function DefaultForm() {
-
+  
+  const [oneway, setOneWay] = useState(false);
   const [routeInfo, setRouteInfo] = useState(null);
 
   function enterData(event) {
@@ -48,6 +49,11 @@ export default function DefaultForm() {
   }
 
   function CalculateRoute(start, end) {
+    if(!start || !end){
+      console.log("YOU MUST FILL BOTH START AND END FIELDS");
+      alert("You must enter both start and end")
+      return;
+    }
     const data = { start, end }
     fetch(`http://localhost:5000/api/route`,{
       method: "POST",
@@ -66,6 +72,15 @@ export default function DefaultForm() {
  
   }
 
+  function RenderTripType(){
+    if(oneway){
+      return <div>One Way Trip</div>
+    }
+    else{
+      return <div>Return Trip Included</div>
+    }
+  }
+
   return (
     <div>
       <form onSubmit={enterData} className="defaultform">
@@ -79,14 +94,30 @@ export default function DefaultForm() {
 
         <label htmlFor="fmpg">mpg: </label>
         <input id="fmpg" name="fmpg" type="text" />
-        <br />
-
-        <button type="submit">Submit</button>
+        <br/>
+        <button 
+          type="button"
+          className="toggle"
+          id="togglebtn" 
+          onClick={() => {
+            setOneWay(!oneway); 
+            console.log("This is a one way trip:" + oneway)}}
+            >
+          Click To Toggle Return Trip
+        <div className="TripType">{RenderTripType()}</div>
+        </button>
+        <button className="submit"id="submit" type="submit">Submit</button>
       </form>
-      {routeInfo && (
+      {routeInfo && oneway &&(
         <div>
           <p>Distance: {routeInfo.miles} miles</p>
           <p>Duration: {routeInfo.min} minutes</p>
+        </div>
+      )}
+      {routeInfo && !oneway &&( 
+        <div>
+          <p>Distance: {routeInfo.miles * 2} miles</p>
+          <p>Duration: {routeInfo.min * 2} minutes</p>
         </div>
       )}
       <footer className="footer">This uses OpenStreetMap for all the map stuff</footer>

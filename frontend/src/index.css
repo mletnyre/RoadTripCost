@@ -45,7 +45,21 @@ body {
   outline: none;
 }
 
-.defaultform button {
+.toggle{
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: gray;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 50px;
+}
+
+.submit{
   width: 100%;
   padding: 12px;
   font-size: 16px;
@@ -58,7 +72,7 @@ body {
   transition: background-color 0.3s;
 }
 
-.defaultform button:hover {
+.defaultform submit:hover {
   background-color: #0056b3;
 }
 
@@ -68,4 +82,8 @@ body {
   font-size: 14px;
   color: #777;
   font-style: italic;
+}
+
+#tripType{
+  font-weight: 300;
 }
