@@ -54,9 +54,47 @@ app.post("/api/route", async (req, res) => {
   console.log("Starting (Lat,Lon) ("+startLatLong.lat +","+startLatLong.lon+")")
   console.log("Ending   (Lat,Lon) ("+endLatLong.lat +","+endLatLong.lon+")")
 
-  res.json({
+  
+  const coords ={
     start: startLatLong,
     end: endLatLong
-  });
+  };
+
+  let routeInfo = await CallOSMR(coords);
+  console.log("Route Info" , routeInfo)
+
+  res.json({
+    routeInfo
+  })
 });
 
+async function CallOSMR(coordinates){
+  console.log("using data:" ,coordinates);
+
+  const startLat = coordinates.start.lat;
+  const startLon = coordinates.start.lon;
+  const endLat   = coordinates.end.lat;
+  const endLon   = coordinates.end.lon;
+
+  console.log("Starting (Lat,Lon) ("+startLat +","+startLon+")")
+  console.log("Ending   (Lat,Lon) ("+endLat +","+endLon+")")
+
+  const url = `http://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`;
+
+  const res = await fetch(url);
+  console.log(res);
+  const data = await res.json();
+
+  const route = data.routes[0];
+
+  const miles = (route.distance * 0.000621371).toFixed(1);
+  const min = (route.duration / 60).toFixed(1);
+
+  console.log("Distance (m):", route.distance);
+  console.log("Distance (Mi):", miles);
+  console.log("Duration (s):", route.duration);
+  console.log("Duration (min)", min)
+  //console.log("Coordinates:", route.geometry.coordinates);
+
+  return {miles, min};
+}

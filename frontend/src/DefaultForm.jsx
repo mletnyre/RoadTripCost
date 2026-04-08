@@ -15,45 +15,12 @@ export default function DefaultForm() {
 
     console.log("using: mpg: " + mpg + " end: " + end + " start: " + start);
 
-    CalculateRoute(start, end);
-  }
-
-  async function CallOSMR(coordinates){
-    console.log("using data:" ,coordinates);
-
-    const startLat = coordinates.start.lat;
-    const startLon = coordinates.start.lon;
-    const endLat   = coordinates.end.lat;
-    const endLon   = coordinates.end.lon;
-
-    console.log("Starting (Lat,Lon) ("+startLat +","+startLon+")")
-    console.log("Ending   (Lat,Lon) ("+endLat +","+endLon+")")
-
-    const url = `http://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`;
-  
-    const res = await fetch(url);
-    const data = await res.json();
-
-    const route = data.routes[0];
-
-    const miles = (route.distance * 0.000621371).toFixed(1);
-    const min = (route.duration / 60).toFixed(1);
-
-    console.log("Distance (m):", route.distance);
-    console.log("Distance (Mi):", miles);
-    console.log("Duration (s):", route.duration);
-    console.log("Duration (min)", min)
-    console.log("Coordinates:", route.geometry.coordinates);
-
-    setRouteInfo({miles, min})
-  }
-
-  function CalculateRoute(start, end) {
     if(!start || !end){
       console.log("YOU MUST FILL BOTH START AND END FIELDS");
       alert("You must enter both start and end")
       return;
     }
+    console.log("fetching info from backend...")
     const data = { start, end }
     fetch(`http://localhost:5000/api/route`,{
       method: "POST",
@@ -67,19 +34,22 @@ export default function DefaultForm() {
         console.log("backend response:", json)
         return json;
       })
-      .then(res => CallOSMR(res))
+      .then(json => {
+        console.log("Setting duration: " + json.routeInfo.min);
+        console.log("Setting distance: " + json.routeInfo.miles);
+        setRouteInfo(json.routeInfo)
+      })
       .catch((err) => console.error(err));
- 
-  }
+}
 
-  function RenderTripType(){
-    if(oneway){
-      return <div>One Way Trip</div>
-    }
-    else{
-      return <div>Return Trip Included</div>
-    }
+function RenderTripType(){
+  if(oneway){
+    return <div>One Way Trip</div>
   }
+  else{
+    return <div>Return Trip Included</div>
+  }
+}
 
   return (
     <div>
